@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.M4'
+		springBootVersion = '2.0.0.M5'
 	}
 	repositories {
 		jcenter()
@@ -22,6 +22,7 @@ sourceCompatibility = 1.8
 
 ext {
     assertJVersion = '3.8.0'
+    wiremockVersion = '2.8.0'
 }
 
 dependencies {
@@ -31,6 +32,7 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('io.projectreactor:reactor-test')
     testCompile("org.assertj:assertj-core:$assertJVersion")
+    testCompile("com.github.tomakehurst:wiremock:$wiremockVersion")
 }
 
 repositories {
