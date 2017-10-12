@@ -29,7 +29,7 @@ public class ApplicationDAO {
         template.insertAll(Stream.of(createMockPi(), createSpringBoot()).collect(Collectors.toList()));
     }
 
-    private Application createMockPi() {
+    public Application createMockPi() {
         return new Application().setName("mockpi").setGroup("com.github.jntakpe");
     }
 

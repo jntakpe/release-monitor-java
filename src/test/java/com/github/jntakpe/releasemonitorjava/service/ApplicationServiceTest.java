@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.test.StepVerifier;
 
@@ -39,6 +40,12 @@ public class ApplicationServiceTest {
                         assertThat(initCount + 1).isEqualTo(applicationDAO.count());
                     })
                     .verifyComplete();
+    }
+
+    @Test
+    public void create_shouldFailCuzApplicationExist() {
+        StepVerifier.create(applicationService.create(applicationDAO.createMockPi()))
+                    .verifyError(DuplicateKeyException.class);
     }
 
 }

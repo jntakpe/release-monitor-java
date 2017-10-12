@@ -1,9 +1,11 @@
 package com.github.jntakpe.releasemonitorjava.model;
 
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
+@CompoundIndex(name = "group_name", def = "{'group' : 1, 'name': 1}", unique = true)
 public class Application {
 
     private ObjectId id;
