@@ -53,8 +53,8 @@ public class ApplicationServiceTest {
     @Test
     public void findAll_shouldRetrieveSome() {
         StepVerifier.create(applicationService.findAll())
-                    .expectNextCount(applicationDAO.count())
                     .recordWith(ArrayList::new)
+                    .expectNextCount(applicationDAO.count())
                     .consumeRecordedWith(r -> assertThat(r).contains(applicationDAO.createMockPi(), applicationDAO.createSpringBoot()))
                     .verifyComplete();
     }
