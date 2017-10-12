@@ -5,6 +5,7 @@ import com.github.jntakpe.releasemonitorjava.repository.ApplicationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -22,6 +23,12 @@ public class ApplicationService {
         LOGGER.info("Creating {}", application);
         return applicationRepository.save(application)
                                     .doOnSuccess(a -> LOGGER.info("{} created", a));
+    }
+
+    public Flux<Application> findAll() {
+        LOGGER.debug("Searching all applications");
+        return applicationRepository.findAll()
+                                    .doOnComplete(() -> LOGGER.debug("All application retrieved"));
     }
 
 }

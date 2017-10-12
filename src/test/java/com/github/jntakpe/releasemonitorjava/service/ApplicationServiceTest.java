@@ -11,6 +11,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -46,6 +48,23 @@ public class ApplicationServiceTest {
     public void create_shouldFailCuzApplicationExist() {
         StepVerifier.create(applicationService.create(applicationDAO.createMockPi()))
                     .verifyError(DuplicateKeyException.class);
+    }
+
+    @Test
+    public void findAll_shouldRetrieveSome() {
+        StepVerifier.create(applicationService.findAll())
+                    .expectNextCount(applicationDAO.count())
+                    .recordWith(ArrayList::new)
+                    .consumeRecordedWith(r -> assertThat(r).contains(applicationDAO.createMockPi(), applicationDAO.createSpringBoot()))
+                    .verifyComplete();
+    }
+
+    @Test
+    public void findAll_shouldBeEmpty() {
+        applicationDAO.deleteAll();
+        StepVerifier.create(applicationService.findAll())
+                    .expectNextCount(0)
+                    .verifyComplete();
     }
 
 }

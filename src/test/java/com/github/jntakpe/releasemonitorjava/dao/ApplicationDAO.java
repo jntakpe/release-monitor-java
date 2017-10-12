@@ -33,7 +33,7 @@ public class ApplicationDAO {
         return new Application().setName("mockpi").setGroup("com.github.jntakpe");
     }
 
-    private Application createSpringBoot() {
+    public Application createSpringBoot() {
         return new Application().setName("spring-boot").setGroup("org.springframework.boot");
     }
 
