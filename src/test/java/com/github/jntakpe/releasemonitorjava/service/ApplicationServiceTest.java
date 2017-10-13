@@ -2,12 +2,14 @@ package com.github.jntakpe.releasemonitorjava.service;
 
 import com.github.jntakpe.releasemonitorjava.dao.ApplicationDAO;
 import com.github.jntakpe.releasemonitorjava.model.Application;
+import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.test.StepVerifier;
 
@@ -39,7 +41,7 @@ public class ApplicationServiceTest {
                     .consumeNextWith(a -> {
                         assertThat(a.getId()).isNotNull();
                         assertThat(a).isEqualTo(application);
-                        assertThat(initCount + 1).isEqualTo(applicationDAO.count());
+                        assertThat(applicationDAO.count()).isEqualTo(initCount + 1);
                     })
                     .verifyComplete();
     }
@@ -48,6 +50,26 @@ public class ApplicationServiceTest {
     public void create_shouldFailCuzApplicationExist() {
         StepVerifier.create(applicationService.create(applicationDAO.createMockPi()))
                     .verifyError(DuplicateKeyException.class);
+    }
+
+    @Test
+    public void update_shouldUpdateExisting() {
+        Long initCount = applicationDAO.count();
+        Application app = applicationDAO.findAny();
+        String updatedName = "updated";
+        StepVerifier.create(applicationService.update(app.getId(), app.setName(updatedName)))
+                .consumeNextWith(a -> {
+                    assertThat(a.getId()).isEqualTo(app.getId());
+                    assertThat(a.getName()).isEqualTo(updatedName);
+                    assertThat(applicationDAO.count()).isEqualTo(initCount);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void update_shouldFailIfIdMissing() {
+        StepVerifier.create(applicationService.update(new ObjectId(), applicationDAO.findAny()))
+                .verifyError(EmptyResultDataAccessException.class);
     }
 
     @Test

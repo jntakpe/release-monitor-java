@@ -37,4 +37,9 @@ public class ApplicationDAO {
         return new Application().setGroup("org.springframework.boot").setName("spring-boot");
     }
 
+    public Application findAny() {
+        return template.find(new Query(), Application.class).stream()
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("No app found"));
+    }
 }
