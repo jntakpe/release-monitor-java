@@ -34,7 +34,7 @@ public class ApplicationServiceTest {
     @Test
     public void create_shouldCreateANewApplication() {
         Long initCount = applicationDAO.count();
-        Application application = new Application().setName("foo").setGroup("bar");
+        Application application = new Application().setGroup("bar").setName("foo");
         StepVerifier.create(applicationService.create(application))
                     .consumeNextWith(a -> {
                         assertThat(a.getId()).isNotNull();

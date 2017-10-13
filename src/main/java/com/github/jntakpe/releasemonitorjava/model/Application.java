@@ -10,9 +10,9 @@ public class Application {
 
     private ObjectId id;
 
-    private String name;
-
     private String group;
+
+    private String name;
 
     public ObjectId getId() {
         return id;
@@ -23,21 +23,21 @@ public class Application {
         return this;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Application setName(String name) {
-        this.name = name;
-        return this;
-    }
-
     public String getGroup() {
         return group;
     }
 
     public Application setGroup(String group) {
         this.group = group;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Application setName(String name) {
+        this.name = name;
         return this;
     }
 
