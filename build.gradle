@@ -23,12 +23,14 @@ sourceCompatibility = 1.8
 ext {
     assertJVersion = '3.8.0'
     wiremockVersion = '2.8.0'
+	javaSemverVersion = '0.9.0'
 }
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
+	compile("com.github.zafarkhaja:java-semver:$javaSemverVersion")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('io.projectreactor:reactor-test')
     testCompile("org.assertj:assertj-core:$assertJVersion")

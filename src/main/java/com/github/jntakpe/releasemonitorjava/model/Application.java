@@ -4,6 +4,9 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document
 @CompoundIndex(name = "group_name", def = "{'group' : 1, 'name': 1}", unique = true)
 public class Application {
@@ -13,6 +16,8 @@ public class Application {
     private String group;
 
     private String name;
+
+    private List<AppVersion> versions = new ArrayList<>();
 
     public ObjectId getId() {
         return id;
@@ -39,6 +44,14 @@ public class Application {
     public Application setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public List<AppVersion> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(List<AppVersion> versions) {
+        this.versions = versions;
     }
 
     @Override
