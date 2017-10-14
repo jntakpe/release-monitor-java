@@ -1,6 +1,8 @@
 package com.github.jntakpe.releasemonitorjava.model;
 
-public class AppVersion {
+import java.util.Comparator;
+
+public class AppVersion implements Comparable<AppVersion> {
 
     private String raw;
 
@@ -69,18 +71,41 @@ public class AppVersion {
     }
 
     @Override
+    public int compareTo(AppVersion other) {
+        if (other == null) {
+            return 1;
+        }
+        return Comparator.comparingInt(AppVersion::getMajor)
+                .thenComparing(AppVersion::getMinor)
+                .thenComparing(AppVersion::getPatch)
+                .thenComparing(AppVersion::getType)
+                .thenComparing((o1, o2) -> (o1.getRcNumber() != null && o2.getRcNumber() != null) ?
+                        o1.getRcNumber().compareTo(o2.getRcNumber()) : 0)
+                .compare(this, other);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AppVersion)) return false;
 
         AppVersion that = (AppVersion) o;
 
-        return raw != null ? raw.equals(that.raw) : that.raw == null;
+        if (major != null ? !major.equals(that.major) : that.major != null) return false;
+        if (minor != null ? !minor.equals(that.minor) : that.minor != null) return false;
+        if (patch != null ? !patch.equals(that.patch) : that.patch != null) return false;
+        if (type != that.type) return false;
+        return rcNumber != null ? rcNumber.equals(that.rcNumber) : that.rcNumber == null;
     }
 
     @Override
     public int hashCode() {
-        return raw != null ? raw.hashCode() : 0;
+        int result = major != null ? major.hashCode() : 0;
+        result = 31 * result + (minor != null ? minor.hashCode() : 0);
+        result = 31 * result + (patch != null ? patch.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (rcNumber != null ? rcNumber.hashCode() : 0);
+        return result;
     }
 
     @Override

@@ -38,8 +38,7 @@ public class ArtifactoryRepositoryTest {
 
     @Test
     public void findVersions_shouldRetrieveVersions() {
-        int initVersionsSize = 8;
-        int versionsSizeWithoutMavenMetadata = initVersionsSize - 1;
+        int versionsSizeWithoutMavenMetadata = 8 - 1;
         Application app = new Application().setGroup("com.github.jntakpe").setName("release-monitor");
         StepVerifier.create(artifactoryRepository.findVersions(app))
                 .recordWith(ArrayList::new)
@@ -53,6 +52,17 @@ public class ArtifactoryRepositoryTest {
         Application app = new Application().setGroup("com.github.jntakpe").setName("service-unknown");
         StepVerifier.create(artifactoryRepository.findVersions(app))
                 .verifyError(WebClientResponseException.class);
+    }
+
+    @Test
+    public void findVersions_shouldRetrieveVersionsSorted() {
+        int versionsSizeWithoutMavenMetadata = 8 - 1;
+        Application app = new Application().setGroup("com.github.jntakpe").setName("release-monitor");
+        StepVerifier.create(artifactoryRepository.findVersions(app))
+                .recordWith(ArrayList::new)
+                .expectNextCount(versionsSizeWithoutMavenMetadata)
+                .consumeRecordedWith(r -> assertThat(new ArrayList<>(r)).isSorted())
+                .verifyComplete();
     }
 
 }

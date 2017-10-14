@@ -30,13 +30,18 @@ public class ArtifactoryRepository {
 
     public Flux<AppVersion> findVersions(Application app) {
         LOGGER.debug("Searching {} versions", app);
+        return findRawVersions(app)
+                .map(VersionMapper::map)
+                .sort()
+                .doOnNext(v -> LOGGER.debug("Versions {} updated", v));
+    }
+
+    private Flux<String> findRawVersions(Application app) {
         return artifactoryClient.get().uri(createFolderPath(app)).retrieve()
-                                .bodyToMono(Folder.class)
+                .bodyToMono(Folder.class)
                 .map(VersionMapper::extractRawVersion)
                 .flatMapMany(Flux::fromIterable)
-                .filter(v -> !isMavenMetadata(v))
-                                .map(VersionMapper::map)
-                                .doOnNext(v -> LOGGER.debug("Versions {} updated", v));
+                .filter(v -> !isMavenMetadata(v));
     }
 
     private String createFolderPath(Application app) {
