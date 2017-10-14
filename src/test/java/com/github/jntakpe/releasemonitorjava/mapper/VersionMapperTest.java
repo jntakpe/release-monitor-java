@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AppVersionMapperTest {
+public class VersionMapperTest {
 
     @Test
     public void extractRawVersion_shouldMapFolderToVersionList() {
@@ -37,7 +37,29 @@ public class AppVersionMapperTest {
     }
 
     @Test
+    public void map_shouldMapRawStringToReleaseWithSuffixIgnoringCase() {
+        String raw = "1.2.3-release";
+        AppVersion version = VersionMapper.map(raw);
+        AppVersion expected = new AppVersion().setRaw(raw).setMajor(1).setMinor(2).setPatch(3).setType(VersionType.RELEASE);
+        assertThat(version).isEqualToComparingFieldByField(expected);
+    }
+
+    @Test
     public void map_shouldMapRawStringToReleaseCandidate() {
+        String raw = "1.2.3-RC1";
+        AppVersion version = VersionMapper.map(raw);
+        AppVersion expected = new AppVersion()
+                .setRaw(raw)
+                .setMajor(1)
+                .setMinor(2)
+                .setPatch(3)
+                .setType(VersionType.RELEASE_CANDIDATE)
+                .setRcNumber(1);
+        assertThat(version).isEqualToComparingFieldByField(expected);
+    }
+
+    @Test
+    public void map_shouldMapRawStringToReleaseCandidateIgnoringCase() {
         String raw = "1.2.3-RC1";
         AppVersion version = VersionMapper.map(raw);
         AppVersion expected = new AppVersion()
@@ -53,6 +75,14 @@ public class AppVersionMapperTest {
     @Test
     public void map_shouldMapRawStringToSnapshot() {
         String raw = "0.1.0-SNAPSHOT";
+        AppVersion version = VersionMapper.map(raw);
+        AppVersion expected = new AppVersion().setRaw(raw).setMajor(0).setMinor(1).setPatch(0).setType(VersionType.SNAPSHOT);
+        assertThat(version).isEqualToComparingFieldByField(expected);
+    }
+
+    @Test
+    public void map_shouldMapRawStringToSnapshotIgnoring() {
+        String raw = "0.1.0-snapshot";
         AppVersion version = VersionMapper.map(raw);
         AppVersion expected = new AppVersion().setRaw(raw).setMajor(0).setMinor(1).setPatch(0).setType(VersionType.SNAPSHOT);
         assertThat(version).isEqualToComparingFieldByField(expected);
