@@ -36,7 +36,7 @@ public class WebClientConfiguration {
     private String buildBasicHeaderValue() {
         ArtifactoryCredentialsProperties credentials = artifactoryProperties.getCredentials();
         String concat = credentials.getUsername() + ":" + credentials.getPassword();
-        return "Basic " + new String(Base64.getEncoder().encode(concat.getBytes()));
+        return "Basic " + Base64.getEncoder().encodeToString(concat.getBytes());
     }
 
 }
