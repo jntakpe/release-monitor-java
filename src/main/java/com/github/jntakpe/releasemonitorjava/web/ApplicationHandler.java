@@ -1,6 +1,7 @@
 package com.github.jntakpe.releasemonitorjava.web;
 
-import com.github.jntakpe.releasemonitorjava.model.Application;
+import com.github.jntakpe.releasemonitorjava.mapper.ApplicationMapper;
+import com.github.jntakpe.releasemonitorjava.model.api.ApplicationDTO;
 import com.github.jntakpe.releasemonitorjava.service.ApplicationService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -22,8 +23,10 @@ public class ApplicationHandler {
     }
 
     public Mono<ServerResponse> create(ServerRequest request) {
-        return request.bodyToMono(Application.class)
-                .flatMap(applicationService::create)
-                .flatMap(a -> ServerResponse.created(URI.create(API + APPLICATIONS + "/" + a.getId())).syncBody(a));
+        return request.bodyToMono(ApplicationDTO.class)
+                      .map(ApplicationMapper::map)
+                      .flatMap(applicationService::create)
+                      .map(ApplicationMapper::map)
+                      .flatMap(a -> ServerResponse.created(URI.create(API + APPLICATIONS + "/" + a.getId())).syncBody(a));
     }
 }

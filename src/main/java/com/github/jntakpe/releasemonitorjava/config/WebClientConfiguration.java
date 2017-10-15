@@ -15,6 +15,8 @@ public class WebClientConfiguration {
 
     private static final String BASE_API = "/artifactory/api";
 
+    private static final String STORAGE_API = "/storage";
+
     private final ArtifactoryProperties artifactoryProperties;
 
     public WebClientConfiguration(ArtifactoryProperties artifactoryProperties) {
@@ -30,7 +32,7 @@ public class WebClientConfiguration {
     }
 
     private String baseUrl() {
-        return artifactoryProperties.getHost() + BASE_API;
+        return artifactoryProperties.getHost() + BASE_API + STORAGE_API + artifactoryProperties.getGradleRepository();
     }
 
     private String buildBasicHeaderValue() {

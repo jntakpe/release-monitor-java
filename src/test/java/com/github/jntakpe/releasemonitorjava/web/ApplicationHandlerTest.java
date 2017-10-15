@@ -1,7 +1,7 @@
 package com.github.jntakpe.releasemonitorjava.web;
 
 import com.github.jntakpe.releasemonitorjava.dao.ApplicationDAO;
-import com.github.jntakpe.releasemonitorjava.model.Application;
+import com.github.jntakpe.releasemonitorjava.model.api.ApplicationDTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,17 +39,17 @@ public class ApplicationHandlerTest {
 
     @Test
     public void create_shouldCreateANewApplication() {
-        Application input = new Application().setGroup("foo").setName("bar");
+        ApplicationDTO input = new ApplicationDTO().setGroup("foo").setName("bar");
         client.post()
-                .uri(API + APPLICATIONS)
-                .syncBody(input)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-                .expectBody(Application.class).consumeWith(r -> {
-            Application application = r.getResponseBody();
-            assertThat(application.getId()).isNotNull();
-            assertThat(application).isEqualToIgnoringGivenFields(input, "id");
+              .uri(UriConstants.API + UriConstants.APPLICATIONS)
+              .syncBody(input)
+              .exchange()
+              .expectStatus().isCreated()
+              .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+              .expectBody(ApplicationDTO.class).consumeWith(r -> {
+            ApplicationDTO app = r.getResponseBody();
+            assertThat(app.getId()).isNotNull();
+            assertThat(app).isEqualToIgnoringGivenFields(input, "id");
         });
     }
 

@@ -14,10 +14,6 @@ import reactor.core.publisher.Flux;
 @Repository
 public class ArtifactoryRepository {
 
-    private static final String STORAGE_API = "/storage";
-
-    private static final String GRADLE_REPO = "/gradle-repo-local";
-
     private static final String MAVEN_METADATA = "maven-metadata.xml";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArtifactoryRepository.class);
@@ -37,15 +33,15 @@ public class ArtifactoryRepository {
     }
 
     private Flux<String> findRawVersions(Application app) {
-        return artifactoryClient.get().uri(createFolderPath(app)).retrieve()
-                .bodyToMono(FolderDTO.class)
-                .map(VersionMapper::extractRawVersion)
-                .flatMapMany(Flux::fromIterable)
-                .filter(v -> !isMavenMetadata(v));
+        return artifactoryClient.get().uri(folderPath(app)).retrieve()
+                                .bodyToMono(FolderDTO.class)
+                                .map(VersionMapper::extractRawVersion)
+                                .flatMapMany(Flux::fromIterable)
+                                .filter(v -> !isMavenMetadata(v));
     }
 
-    private String createFolderPath(Application app) {
-        return STORAGE_API + GRADLE_REPO + "/" + PathUtils.dotToSlash(app.getGroup()) + "/" + app.getName();
+    private String folderPath(Application app) {
+        return "/" + PathUtils.dotToSlash(app.getGroup()) + "/" + app.getName();
     }
 
     private boolean isMavenMetadata(String input) {

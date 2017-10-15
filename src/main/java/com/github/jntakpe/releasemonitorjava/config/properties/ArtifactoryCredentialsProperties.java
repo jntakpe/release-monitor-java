@@ -1,7 +1,10 @@
 package com.github.jntakpe.releasemonitorjava.config.properties;
 
+import org.springframework.validation.annotation.Validated;
+
 import javax.validation.constraints.NotNull;
 
+@Validated
 public class ArtifactoryCredentialsProperties {
 
     @NotNull

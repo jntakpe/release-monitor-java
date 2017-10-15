@@ -40,19 +40,30 @@ public class ApplicationMapperTest {
     }
 
     @Test
-    public void map_shouldMapEntityToDTO() {
+    public void map_shouldMapEntityWithoutIdToDTO() {
         AppVersion version = new AppVersion().setRaw("1.2.3").setMajor(1).setMinor(2).setPatch(3).setType(VersionType.RELEASE);
         Application entity = new Application()
-                .setId(new ObjectId())
                 .setGroup("foo")
                 .setName("bar")
                 .setVersions(Collections.singletonList(version));
         ApplicationDTO dto = ApplicationMapper.map(entity);
         assertThat(dto).isNotNull();
-        assertThat(dto.getId()).isEqualTo(entity.getId().toString());
         assertThat(dto.getGroup()).isEqualTo(entity.getGroup());
         assertThat(dto.getName()).isEqualTo(entity.getName());
         assertThat(dto.getVersions()).isEqualTo(entity.getVersions());
+    }
+
+    @Test
+    public void map_shouldMapEntityWithIdToDTO() {
+        AppVersion version = new AppVersion().setRaw("1.2.3").setMajor(1).setMinor(2).setPatch(3).setType(VersionType.RELEASE);
+        ObjectId id = new ObjectId();
+        Application entity = new Application()
+                .setId(id)
+                .setGroup("foo")
+                .setName("bar")
+                .setVersions(Collections.singletonList(version));
+        ApplicationDTO dto = ApplicationMapper.map(entity);
+        assertThat(dto.getId()).isEqualTo(id.toString());
     }
 
 }

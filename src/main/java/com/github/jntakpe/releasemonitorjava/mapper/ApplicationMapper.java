@@ -19,7 +19,7 @@ public final class ApplicationMapper {
 
     public static ApplicationDTO map(Application entity) {
         return new ApplicationDTO()
-                .setId(entity.getId().toString())
+                .setId(entity.getId() != null ? entity.getId().toString() : null)
                 .setGroup(entity.getGroup())
                 .setName(entity.getName())
                 .setVersions(entity.getVersions());
