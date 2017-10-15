@@ -2,8 +2,8 @@ package com.github.jntakpe.releasemonitorjava.mapper;
 
 import com.github.jntakpe.releasemonitorjava.model.AppVersion;
 import com.github.jntakpe.releasemonitorjava.model.VersionType;
-import com.github.jntakpe.releasemonitorjava.model.client.Folder;
-import com.github.jntakpe.releasemonitorjava.model.client.FolderChildren;
+import com.github.jntakpe.releasemonitorjava.model.client.FolderChildrenDTO;
+import com.github.jntakpe.releasemonitorjava.model.client.FolderDTO;
 import com.github.jntakpe.releasemonitorjava.utils.PathUtils;
 import com.github.zafarkhaja.semver.Version;
 
@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 public final class VersionMapper {
 
-    public static List<String> extractRawVersion(Folder folder) {
-        return folder.getChildren().stream()
-                .map(FolderChildren::getUri)
+    public static List<String> extractRawVersion(FolderDTO folderDTO) {
+        return folderDTO.getChildren().stream()
+                .map(FolderChildrenDTO::getUri)
                 .map(PathUtils::removeLeadingSlash)
                 .collect(Collectors.toList());
     }

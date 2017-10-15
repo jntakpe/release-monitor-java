@@ -2,8 +2,8 @@ package com.github.jntakpe.releasemonitorjava.mapper;
 
 import com.github.jntakpe.releasemonitorjava.model.AppVersion;
 import com.github.jntakpe.releasemonitorjava.model.VersionType;
-import com.github.jntakpe.releasemonitorjava.model.client.Folder;
-import com.github.jntakpe.releasemonitorjava.model.client.FolderChildren;
+import com.github.jntakpe.releasemonitorjava.model.client.FolderChildrenDTO;
+import com.github.jntakpe.releasemonitorjava.model.client.FolderDTO;
 import org.junit.Test;
 
 import java.util.stream.Collectors;
@@ -15,9 +15,9 @@ public class VersionMapperTest {
 
     @Test
     public void extractRawVersion_shouldMapFolderToVersionList() {
-        Folder folder = new Folder().setChildren(
-                Stream.of(new FolderChildren().setUri("/1.0.0-RC1"), new FolderChildren().setUri("/1.0.0")).collect(Collectors.toList()));
-        assertThat(VersionMapper.extractRawVersion(folder)).containsExactly("1.0.0-RC1", "1.0.0");
+        FolderDTO folderDTO = new FolderDTO().setChildren(
+                Stream.of(new FolderChildrenDTO().setUri("/1.0.0-RC1"), new FolderChildrenDTO().setUri("/1.0.0")).collect(Collectors.toList()));
+        assertThat(VersionMapper.extractRawVersion(folderDTO)).containsExactly("1.0.0-RC1", "1.0.0");
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.github.jntakpe.releasemonitorjava.model.client;
 
-public class FolderChildren {
+public class FolderChildrenDTO {
 
     private String uri;
 
@@ -8,7 +8,7 @@ public class FolderChildren {
         return uri;
     }
 
-    public FolderChildren setUri(String uri) {
+    public FolderChildrenDTO setUri(String uri) {
         this.uri = uri;
         return this;
     }

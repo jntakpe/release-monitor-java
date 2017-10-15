@@ -3,7 +3,7 @@ package com.github.jntakpe.releasemonitorjava.repository;
 import com.github.jntakpe.releasemonitorjava.mapper.VersionMapper;
 import com.github.jntakpe.releasemonitorjava.model.AppVersion;
 import com.github.jntakpe.releasemonitorjava.model.Application;
-import com.github.jntakpe.releasemonitorjava.model.client.Folder;
+import com.github.jntakpe.releasemonitorjava.model.client.FolderDTO;
 import com.github.jntakpe.releasemonitorjava.utils.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class ArtifactoryRepository {
 
     private Flux<String> findRawVersions(Application app) {
         return artifactoryClient.get().uri(createFolderPath(app)).retrieve()
-                .bodyToMono(Folder.class)
+                .bodyToMono(FolderDTO.class)
                 .map(VersionMapper::extractRawVersion)
                 .flatMapMany(Flux::fromIterable)
                 .filter(v -> !isMavenMetadata(v));

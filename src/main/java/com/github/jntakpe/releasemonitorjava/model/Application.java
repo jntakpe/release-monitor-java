@@ -50,8 +50,9 @@ public class Application {
         return versions;
     }
 
-    public void setVersions(List<AppVersion> versions) {
+    public Application setVersions(List<AppVersion> versions) {
         this.versions = versions;
+        return this;
     }
 
     @Override
