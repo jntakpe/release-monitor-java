@@ -73,6 +73,24 @@ public class ApplicationServiceTest {
     }
 
     @Test
+    public void delete_shouldRemoveApplication() {
+        Long initCount = applicationDAO.count();
+        Application app = applicationDAO.findAny();
+        StepVerifier.create(applicationService.delete(app.getId()))
+                .consumeNextWith(a -> {
+                    assertThat(applicationDAO.count()).isEqualTo(initCount - 1);
+                    assertThat(applicationDAO.findAll()).doesNotContain(app);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void delete_shouldFailIfIdMissing() {
+        StepVerifier.create(applicationService.delete(new ObjectId()))
+                .verifyError(EmptyResultDataAccessException.class);
+    }
+
+    @Test
     public void findAll_shouldRetrieveSome() {
         StepVerifier.create(applicationService.findAll())
                     .recordWith(ArrayList::new)

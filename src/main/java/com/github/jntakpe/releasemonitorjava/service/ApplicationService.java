@@ -28,11 +28,19 @@ public class ApplicationService {
     }
 
     public Mono<Application> update(ObjectId id, Application app) {
-        LOGGER.info("Updating {}", app);
         return findById(id)
+                .doOnNext(a -> LOGGER.info("Updating {}", app))
                 .switchIfEmpty(errorIfEmpty(id))
                 .flatMap(a -> applicationRepository.save(app))
                 .doOnSuccess(a -> LOGGER.info("{} updated", a));
+    }
+
+    public Mono<Application> delete(ObjectId id) {
+        return findById(id)
+                .switchIfEmpty(errorIfEmpty(id))
+                .doOnNext(a -> LOGGER.info("Deleting {}", a))
+                .flatMap(a -> applicationRepository.delete(a).then(Mono.just(a)))
+                .doOnSuccess(a -> LOGGER.info("{} deleted", a));
     }
 
     public Flux<Application> findAll() {
@@ -44,12 +52,12 @@ public class ApplicationService {
     private Mono<Application> findById(ObjectId id) {
         LOGGER.debug("Searching application with id {}", id);
         return applicationRepository.findById(id)
-                .doOnSuccess(a -> LOGGER.debug("{} retrieved with id {}", a, id));
+                .doOnNext(a -> LOGGER.debug("{} retrieved with id {}", a, id));
     }
 
     private Mono<Application> errorIfEmpty(ObjectId id) {
         String message = String.format("Unable to find application matching id %s", id);
-        LOGGER.warn(message);
-        return Mono.error(new EmptyResultDataAccessException(message, 1));
+        return Mono.<Application>error(new EmptyResultDataAccessException(message, 1))
+                .doOnError(e -> LOGGER.warn(message));
     }
 }

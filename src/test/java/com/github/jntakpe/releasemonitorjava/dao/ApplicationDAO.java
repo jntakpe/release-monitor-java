@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,5 +42,9 @@ public class ApplicationDAO {
         return template.find(new Query(), Application.class).stream()
                 .findAny()
                 .orElseThrow(() -> new IllegalStateException("No app found"));
+    }
+
+    public List<Application> findAll() {
+        return template.findAll(Application.class);
     }
 }
