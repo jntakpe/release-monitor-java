@@ -21,8 +21,8 @@ public class ApplicationService {
         this.applicationRepository = applicationRepository;
     }
 
-    public Mono<Application> create(Application application) {
-        return Mono.just(application)
+    public Mono<Application> create(Application app) {
+        return Mono.just(app)
                    .doOnNext(a -> LOGGER.info("Creating {}", a))
                    .flatMap(applicationRepository::save)
                    .doOnSuccess(a -> LOGGER.info("{} created", a));
@@ -30,9 +30,10 @@ public class ApplicationService {
 
     public Mono<Application> update(ObjectId id, Application app) {
         return findById(id)
-                .doOnNext(a -> LOGGER.info("Updating {}", app))
+                .map(a -> checkIdsMatches(id, app))
+                .doOnNext(a -> LOGGER.info("Updating {}", a))
                 .switchIfEmpty(errorIfEmpty(id))
-                .flatMap(a -> applicationRepository.save(app))
+                .flatMap(applicationRepository::save)
                 .doOnSuccess(a -> LOGGER.info("{} updated", a));
     }
 
@@ -62,5 +63,12 @@ public class ApplicationService {
         return Mono.<Application>error(
                 new EmptyResultDataAccessException(String.format("Unable to find application matching id %s", id), 1))
                 .doOnError(e -> LOGGER.warn(e.getMessage()));
+    }
+
+    private Application checkIdsMatches(ObjectId id, Application app) {
+        if (app.getId() != null && !app.getId().equals(id)) {
+            throw new IllegalStateException(String.format("Id %s doesn't match application's %s id", id, app));
+        }
+        return app.setId(id);
     }
 }

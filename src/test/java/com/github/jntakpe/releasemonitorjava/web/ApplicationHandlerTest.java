@@ -1,7 +1,9 @@
 package com.github.jntakpe.releasemonitorjava.web;
 
 import com.github.jntakpe.releasemonitorjava.dao.ApplicationDAO;
+import com.github.jntakpe.releasemonitorjava.mapper.ApplicationMapper;
 import com.github.jntakpe.releasemonitorjava.model.api.ApplicationDTO;
+import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +50,7 @@ public class ApplicationHandlerTest {
               .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
               .expectBody(ApplicationDTO.class).consumeWith(r -> {
             ApplicationDTO app = r.getResponseBody();
+            assertThat(app).isNotNull();
             assertThat(app.getId()).isNotNull();
             assertThat(app).isEqualToIgnoringGivenFields(input, "id");
         });
@@ -60,6 +63,33 @@ public class ApplicationHandlerTest {
                 .syncBody(applicationDAO.createMockPi())
                 .exchange()
                 .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    public void update_shouldUpdateExisting() {
+        String name = "updated";
+        ApplicationDTO input = ApplicationMapper.map(applicationDAO.findAny().setName(name));
+        client.put()
+              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", input.getId())
+              .syncBody(input)
+              .exchange()
+              .expectStatus().isOk()
+              .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+              .expectBody(ApplicationDTO.class).consumeWith(r -> {
+            ApplicationDTO app = r.getResponseBody();
+            assertThat(app).isNotNull();
+            assertThat(app.getName()).isEqualTo(name);
+            assertThat(app).isEqualToIgnoringGivenFields(input, "name");
+        });
+    }
+
+    @Test
+    public void update_shouldFailIfWrongId() {
+        client.put()
+              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", new ObjectId())
+              .syncBody(ApplicationMapper.map(applicationDAO.findAny()))
+              .exchange()
+              .expectStatus().is5xxServerError();
     }
 
 }

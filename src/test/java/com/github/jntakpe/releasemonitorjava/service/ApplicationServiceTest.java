@@ -73,6 +73,22 @@ public class ApplicationServiceTest {
     }
 
     @Test
+    public void update_shouldFailIfIdDoesNotMatch() {
+        Application app = applicationDAO.findAny();
+        StepVerifier.create(applicationService.update(app.getId(), app.setId(new ObjectId()).setName("updated")))
+                    .verifyError(IllegalStateException.class);
+    }
+
+    @Test
+    public void update_shouldSetIdIfNull() {
+        Application app = applicationDAO.findAny();
+        ObjectId id = app.getId();
+        StepVerifier.create(applicationService.update(id, app.setId(null)))
+                    .consumeNextWith(a -> assertThat(a.getId()).isEqualTo(id))
+                    .verifyComplete();
+    }
+
+    @Test
     public void delete_shouldRemoveApplication() {
         Long initCount = applicationDAO.count();
         Application app = applicationDAO.findAny();
