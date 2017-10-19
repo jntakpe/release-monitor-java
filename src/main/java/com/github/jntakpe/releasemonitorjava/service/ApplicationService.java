@@ -22,9 +22,10 @@ public class ApplicationService {
     }
 
     public Mono<Application> create(Application application) {
-        LOGGER.info("Creating {}", application);
-        return applicationRepository.save(application)
-                .doOnSuccess(a -> LOGGER.info("{} created", a));
+        return Mono.just(application)
+                   .doOnNext(a -> LOGGER.info("Creating {}", a))
+                   .flatMap(applicationRepository::save)
+                   .doOnSuccess(a -> LOGGER.info("{} created", a));
     }
 
     public Mono<Application> update(ObjectId id, Application app) {
@@ -44,20 +45,22 @@ public class ApplicationService {
     }
 
     public Flux<Application> findAll() {
-        LOGGER.debug("Searching all applications");
-        return applicationRepository.findAll()
-                .doOnComplete(() -> LOGGER.debug("All application retrieved"));
+        return Mono.just(true)
+                   .doOnNext(b -> LOGGER.debug("Searching all applications"))
+                   .flatMapMany(a -> applicationRepository.findAll())
+                   .doOnComplete(() -> LOGGER.debug("All application retrieved"));
     }
 
     private Mono<Application> findById(ObjectId id) {
-        LOGGER.debug("Searching application with id {}", id);
-        return applicationRepository.findById(id)
-                .doOnNext(a -> LOGGER.debug("{} retrieved with id {}", a, id));
+        return Mono.just(id)
+                   .doOnNext(i -> LOGGER.debug("Searching application with id {}", i))
+                   .flatMap(applicationRepository::findById)
+                   .doOnNext(a -> LOGGER.debug("{} retrieved with id {}", a, id));
     }
 
     private Mono<Application> errorIfEmpty(ObjectId id) {
-        String message = String.format("Unable to find application matching id %s", id);
-        return Mono.<Application>error(new EmptyResultDataAccessException(message, 1))
-                .doOnError(e -> LOGGER.warn(message));
+        return Mono.<Application>error(
+                new EmptyResultDataAccessException(String.format("Unable to find application matching id %s", id), 1))
+                .doOnError(e -> LOGGER.warn(e.getMessage()));
     }
 }
