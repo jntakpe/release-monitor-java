@@ -42,17 +42,19 @@ public class ApplicationHandlerTest {
     @Test
     public void create_shouldCreateANewApplication() {
         ApplicationDTO input = new ApplicationDTO().setGroup("foo").setName("bar");
+        Long initCount = applicationDAO.count();
         client.post()
-              .uri(UriConstants.API + UriConstants.APPLICATIONS)
-              .syncBody(input)
-              .exchange()
-              .expectStatus().isCreated()
-              .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-              .expectBody(ApplicationDTO.class).consumeWith(r -> {
+                .uri(UriConstants.API + UriConstants.APPLICATIONS)
+                .syncBody(input)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody(ApplicationDTO.class).consumeWith(r -> {
             ApplicationDTO app = r.getResponseBody();
             assertThat(app).isNotNull();
             assertThat(app.getId()).isNotNull();
             assertThat(app).isEqualToIgnoringGivenFields(input, "id");
+            assertThat(applicationDAO.count()).isEqualTo(initCount + 1);
         });
     }
 
@@ -70,26 +72,38 @@ public class ApplicationHandlerTest {
         String name = "updated";
         ApplicationDTO input = ApplicationMapper.map(applicationDAO.findAny().setName(name));
         client.put()
-              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", input.getId())
-              .syncBody(input)
-              .exchange()
-              .expectStatus().isOk()
-              .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-              .expectBody(ApplicationDTO.class).consumeWith(r -> {
+                .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", input.getId())
+                .syncBody(input)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody(ApplicationDTO.class).consumeWith(r -> {
             ApplicationDTO app = r.getResponseBody();
             assertThat(app).isNotNull();
             assertThat(app.getName()).isEqualTo(name);
             assertThat(app).isEqualToIgnoringGivenFields(input, "name");
+            assertThat(applicationDAO.findById(new ObjectId(input.getId())).getName()).isEqualTo(name);
         });
     }
 
     @Test
     public void update_shouldFailIfWrongId() {
         client.put()
-              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", new ObjectId())
-              .syncBody(ApplicationMapper.map(applicationDAO.findAny()))
-              .exchange()
-              .expectStatus().is5xxServerError();
+                .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", new ObjectId())
+                .syncBody(ApplicationMapper.map(applicationDAO.findAny()))
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    public void delete_shouldDelete() {
+        Long initCount = applicationDAO.count();
+        String id = applicationDAO.findAny().getId().toString();
+        client.delete()
+                .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", id)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().consumeWith(r -> assertThat(applicationDAO.count()).isEqualTo(initCount - 1));
     }
 
 }

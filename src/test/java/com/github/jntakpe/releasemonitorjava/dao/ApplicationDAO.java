@@ -1,6 +1,7 @@
 package com.github.jntakpe.releasemonitorjava.dao;
 
 import com.github.jntakpe.releasemonitorjava.model.Application;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
@@ -47,4 +48,9 @@ public class ApplicationDAO {
     public List<Application> findAll() {
         return template.findAll(Application.class);
     }
+
+    public Application findById(ObjectId id) {
+        return template.findById(id, Application.class);
+    }
+
 }
