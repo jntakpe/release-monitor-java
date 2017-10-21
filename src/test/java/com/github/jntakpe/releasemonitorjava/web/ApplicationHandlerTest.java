@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.List;
+
 import static com.github.jntakpe.releasemonitorjava.web.UriConstants.API;
 import static com.github.jntakpe.releasemonitorjava.web.UriConstants.APPLICATIONS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +39,32 @@ public class ApplicationHandlerTest {
         client = WebTestClient.bindToServer()
                 .baseUrl("http://localhost:" + port)
                 .build();
+    }
+
+    @Test
+    public void findAll_shouldFindAll() {
+        client.get()
+                .uri(UriConstants.API + UriConstants.APPLICATIONS)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ApplicationDTO.class).consumeWith(l -> {
+            List<ApplicationDTO> apps = l.getResponseBody();
+            assertThat(apps).isNotEmpty();
+            assertThat(apps).hasSize(applicationDAO.count().intValue());
+        });
+    }
+
+    @Test
+    public void findAll_shouldFindNone() {
+        applicationDAO.deleteAll();
+        client.get()
+                .uri(UriConstants.API + UriConstants.APPLICATIONS)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ApplicationDTO.class).consumeWith(l -> {
+            List<ApplicationDTO> apps = l.getResponseBody();
+            assertThat(apps).isEmpty();
+        });
     }
 
     @Test

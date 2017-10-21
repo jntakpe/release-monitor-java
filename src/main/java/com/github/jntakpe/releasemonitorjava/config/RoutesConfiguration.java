@@ -25,8 +25,10 @@ public class RoutesConfiguration {
     @Bean
     public RouterFunction<ServerResponse> apiRouter() {
         return nest(path(API).and(accept(MediaType.APPLICATION_JSON)),
-                nest(path(APPLICATIONS), route(POST("/"), applicationHandler::create)
+                nest(path(APPLICATIONS), route(GET("/"), applicationHandler::findAll)
+                        .and(route(POST("/"), applicationHandler::create))
                         .and(route(PUT("/{id}"), applicationHandler::update))
-                        .and(route(DELETE("/{id}"), applicationHandler::delete))));
+                        .and(route(DELETE("/{id}"), applicationHandler::delete))
+                ));
     }
 }

@@ -23,6 +23,10 @@ public class ApplicationHandler {
         this.applicationService = applicationService;
     }
 
+    public Mono<ServerResponse> findAll(ServerRequest serverRequest) {
+        return ServerResponse.ok().body(applicationService.findAll().map(ApplicationMapper::map), ApplicationDTO.class);
+    }
+
     public Mono<ServerResponse> create(ServerRequest request) {
         return request.bodyToMono(ApplicationDTO.class)
                 .map(ApplicationMapper::map)
@@ -45,4 +49,5 @@ public class ApplicationHandler {
                 .flatMap(applicationService::delete)
                 .flatMap(a -> ServerResponse.noContent().build());
     }
+
 }
