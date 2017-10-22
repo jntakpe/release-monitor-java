@@ -23,9 +23,6 @@ public class ArtifactoryRepositoryTest {
 
     private static WireMockServer wireMockServer = new WireMockServer(8089);
 
-    @Autowired
-    private ArtifactoryRepository artifactoryRepository;
-
     @BeforeClass
     public static void setup() {
         wireMockServer.start();
@@ -35,6 +32,9 @@ public class ArtifactoryRepositoryTest {
     public static void tearDown() {
         wireMockServer.stop();
     }
+
+    @Autowired
+    private ArtifactoryRepository artifactoryRepository;
 
     @Test
     public void findVersions_shouldRetrieveVersions() {

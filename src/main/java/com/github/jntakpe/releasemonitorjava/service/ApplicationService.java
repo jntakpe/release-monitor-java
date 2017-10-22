@@ -1,7 +1,9 @@
 package com.github.jntakpe.releasemonitorjava.service;
 
+import com.github.jntakpe.releasemonitorjava.model.AppVersion;
 import com.github.jntakpe.releasemonitorjava.model.Application;
 import com.github.jntakpe.releasemonitorjava.repository.ApplicationRepository;
+import com.github.jntakpe.releasemonitorjava.repository.ArtifactoryRepository;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ApplicationService {
 
@@ -17,8 +22,11 @@ public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
 
-    public ApplicationService(ApplicationRepository applicationRepository) {
+    private final ArtifactoryRepository artifactoryRepository;
+
+    public ApplicationService(ApplicationRepository applicationRepository, ArtifactoryRepository artifactoryRepository) {
         this.applicationRepository = applicationRepository;
+        this.artifactoryRepository = artifactoryRepository;
     }
 
     public Mono<Application> create(Application app) {
@@ -31,8 +39,8 @@ public class ApplicationService {
     public Mono<Application> update(ObjectId id, Application app) {
         return findById(id)
                 .map(a -> checkIdsMatches(id, app))
-                .doOnNext(a -> LOGGER.info("Updating {}", a))
                 .switchIfEmpty(errorIfEmpty(id))
+                .doOnNext(a -> LOGGER.info("Updating {}", a))
                 .flatMap(applicationRepository::save)
                 .doOnSuccess(a -> LOGGER.info("{} updated", a));
     }
@@ -50,6 +58,25 @@ public class ApplicationService {
                    .doOnNext(b -> LOGGER.debug("Searching all applications"))
                    .flatMapMany(a -> applicationRepository.findAll())
                    .doOnComplete(() -> LOGGER.debug("All application retrieved"));
+    }
+
+    public Flux<Application> monitor() {
+        return findAll().flatMap(this::appWithVersions);
+    }
+
+    private Mono<Application> appWithVersions(Application app) {
+        return artifactoryRepository.findVersions(app)
+                .collect(Collectors.toList())
+                .flatMap(v -> updateVersionsIfNeeded(app, v));
+    }
+
+    private Mono<Application> updateVersionsIfNeeded(Application existing, List<AppVersion> versions) {
+        if (existing.getVersions().equals(versions)) {
+            return Mono.just(existing);
+        }
+        LOGGER.info("Update {} versions to {}", existing, versions);
+        return applicationRepository.save(existing.setVersions(versions))
+                .doOnSuccess(a -> LOGGER.info("{} versions updated", a));
     }
 
     private Mono<Application> findById(ObjectId id) {

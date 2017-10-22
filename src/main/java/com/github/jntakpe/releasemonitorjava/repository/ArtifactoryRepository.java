@@ -29,7 +29,7 @@ public class ArtifactoryRepository {
         return findRawVersions(app)
                 .map(VersionMapper::map)
                 .sort()
-                .doOnNext(v -> LOGGER.debug("Versions {} updated", v));
+                .doOnComplete(() -> LOGGER.debug("{} versions retrieved", app));
     }
 
     private Flux<String> findRawVersions(Application app) {
