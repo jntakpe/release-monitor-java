@@ -2,11 +2,8 @@ package com.github.jntakpe.releasemonitorjava.service;
 
 import com.github.jntakpe.releasemonitorjava.dao.ApplicationDAO;
 import com.github.jntakpe.releasemonitorjava.model.Application;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import org.bson.types.ObjectId;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,23 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 public class ApplicationServiceTest {
 
-    private static WireMockServer wireMockServer = new WireMockServer(8089);
-
     @Autowired
     private ApplicationService applicationService;
 
     @Autowired
     private ApplicationDAO applicationDAO;
-
-    @BeforeClass
-    public static void setup() {
-        wireMockServer.start();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        wireMockServer.stop();
-    }
 
     @Before
     public void setUp() {

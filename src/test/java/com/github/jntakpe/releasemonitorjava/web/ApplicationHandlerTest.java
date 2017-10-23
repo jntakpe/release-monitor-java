@@ -13,7 +13,11 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.jntakpe.releasemonitorjava.web.UriConstants.API;
@@ -37,17 +41,17 @@ public class ApplicationHandlerTest {
         applicationDAO.deleteAll();
         applicationDAO.insertAll();
         client = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:" + port)
-                .build();
+                              .baseUrl("http://localhost:" + port)
+                              .build();
     }
 
     @Test
     public void findAll_shouldFindAll() {
         client.get()
-                .uri(UriConstants.API + UriConstants.APPLICATIONS)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ApplicationDTO.class).consumeWith(l -> {
+              .uri(UriConstants.API + UriConstants.APPLICATIONS)
+              .exchange()
+              .expectStatus().isOk()
+              .expectBodyList(ApplicationDTO.class).consumeWith(l -> {
             List<ApplicationDTO> apps = l.getResponseBody();
             assertThat(apps).isNotEmpty();
             assertThat(apps).hasSize(applicationDAO.count().intValue());
@@ -58,13 +62,37 @@ public class ApplicationHandlerTest {
     public void findAll_shouldFindNone() {
         applicationDAO.deleteAll();
         client.get()
-                .uri(UriConstants.API + UriConstants.APPLICATIONS)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ApplicationDTO.class).consumeWith(l -> {
+              .uri(UriConstants.API + UriConstants.APPLICATIONS)
+              .exchange()
+              .expectStatus().isOk()
+              .expectBodyList(ApplicationDTO.class).consumeWith(l -> {
             List<ApplicationDTO> apps = l.getResponseBody();
             assertThat(apps).isEmpty();
         });
+    }
+
+    @Test
+    public void monitor_shouldRetrieveSomeApps() {
+        Long count = applicationDAO.count();
+        Flux<ApplicationDTO> response = client.get()
+                                              .uri(UriConstants.API + UriConstants.APPLICATIONS)
+                                              .accept(MediaType.TEXT_EVENT_STREAM)
+                                              .exchange()
+                                              .expectStatus().isOk()
+                                              .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM)
+                                              .returnResult(ApplicationDTO.class)
+                                              .getResponseBody();
+        StepVerifier.withVirtualTime(() -> response)
+                    .expectSubscription()
+                    .expectNoEvent(Duration.ZERO)
+                    .recordWith(ArrayList::new)
+                    .expectNextCount(count)
+                    .consumeRecordedWith(r -> {
+                        assertThat(r).hasSize(count.intValue());
+                        r.stream().map(ApplicationDTO::getVersions).forEach(v -> assertThat(v).isNotEmpty());
+                    })
+                    .thenCancel()
+                    .verify();
     }
 
     @Test
@@ -72,12 +100,12 @@ public class ApplicationHandlerTest {
         ApplicationDTO input = new ApplicationDTO().setGroup("foo").setName("bar");
         Long initCount = applicationDAO.count();
         client.post()
-                .uri(UriConstants.API + UriConstants.APPLICATIONS)
-                .syncBody(input)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-                .expectBody(ApplicationDTO.class).consumeWith(r -> {
+              .uri(UriConstants.API + UriConstants.APPLICATIONS)
+              .syncBody(input)
+              .exchange()
+              .expectStatus().isCreated()
+              .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+              .expectBody(ApplicationDTO.class).consumeWith(r -> {
             ApplicationDTO app = r.getResponseBody();
             assertThat(app).isNotNull();
             assertThat(app.getId()).isNotNull();
@@ -89,10 +117,10 @@ public class ApplicationHandlerTest {
     @Test
     public void create_shouldFailCuzApplicationExists() {
         client.post()
-                .uri(API + APPLICATIONS)
-                .syncBody(applicationDAO.createMockPi())
-                .exchange()
-                .expectStatus().is5xxServerError();
+              .uri(API + APPLICATIONS)
+              .syncBody(applicationDAO.createMockPi())
+              .exchange()
+              .expectStatus().is5xxServerError();
     }
 
     @Test
@@ -100,12 +128,12 @@ public class ApplicationHandlerTest {
         String name = "updated";
         ApplicationDTO input = ApplicationMapper.map(applicationDAO.findAny().setName(name));
         client.put()
-                .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", input.getId())
-                .syncBody(input)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-                .expectBody(ApplicationDTO.class).consumeWith(r -> {
+              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", input.getId())
+              .syncBody(input)
+              .exchange()
+              .expectStatus().isOk()
+              .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+              .expectBody(ApplicationDTO.class).consumeWith(r -> {
             ApplicationDTO app = r.getResponseBody();
             assertThat(app).isNotNull();
             assertThat(app.getName()).isEqualTo(name);
@@ -117,10 +145,10 @@ public class ApplicationHandlerTest {
     @Test
     public void update_shouldFailIfWrongId() {
         client.put()
-                .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", new ObjectId())
-                .syncBody(ApplicationMapper.map(applicationDAO.findAny()))
-                .exchange()
-                .expectStatus().is5xxServerError();
+              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", new ObjectId())
+              .syncBody(ApplicationMapper.map(applicationDAO.findAny()))
+              .exchange()
+              .expectStatus().is5xxServerError();
     }
 
     @Test
@@ -128,10 +156,10 @@ public class ApplicationHandlerTest {
         Long initCount = applicationDAO.count();
         String id = applicationDAO.findAny().getId().toString();
         client.delete()
-                .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", id)
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().consumeWith(r -> assertThat(applicationDAO.count()).isEqualTo(initCount - 1));
+              .uri(UriConstants.API + UriConstants.APPLICATIONS + "/{id}", id)
+              .exchange()
+              .expectStatus().isNoContent()
+              .expectBody().consumeWith(r -> assertThat(applicationDAO.count()).isEqualTo(initCount - 1));
     }
 
 }

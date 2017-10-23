@@ -2,3 +2,7 @@ artifactory:
   host: http://depdevops-artifactory.westeurope.cloudapp.azure.com
   baseApi: /artifactory/api
   gradleRepository: /gradle-repo-local
+spring:
+  data:
+    mongodb:
+      database: release_monitor

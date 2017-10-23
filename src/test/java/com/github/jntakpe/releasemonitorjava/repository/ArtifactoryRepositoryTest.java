@@ -2,9 +2,6 @@ package com.github.jntakpe.releasemonitorjava.repository;
 
 import com.github.jntakpe.releasemonitorjava.model.AppVersion;
 import com.github.jntakpe.releasemonitorjava.model.Application;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class ArtifactoryRepositoryTest {
-
-    private static WireMockServer wireMockServer = new WireMockServer(8089);
-
-    @BeforeClass
-    public static void setup() {
-        wireMockServer.start();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        wireMockServer.stop();
-    }
 
     @Autowired
     private ArtifactoryRepository artifactoryRepository;

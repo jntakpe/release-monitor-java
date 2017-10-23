@@ -24,11 +24,13 @@ public class RoutesConfiguration {
 
     @Bean
     public RouterFunction<ServerResponse> apiRouter() {
-        return nest(path(API).and(accept(MediaType.APPLICATION_JSON)),
-                nest(path(APPLICATIONS), route(GET("/"), applicationHandler::findAll)
-                        .and(route(POST("/"), applicationHandler::create))
-                        .and(route(PUT("/{id}"), applicationHandler::update))
-                        .and(route(DELETE("/{id}"), applicationHandler::delete))
-                ));
+        return nest(path(API),
+                    nest(path(APPLICATIONS),
+                         nest(accept(MediaType.APPLICATION_JSON), route(GET("/"), applicationHandler::findAll)
+                                 .and(route(POST("/"), applicationHandler::create))
+                                 .and(route(PUT("/{id}"), applicationHandler::update))
+                                 .and(route(DELETE("/{id}"), applicationHandler::delete)))
+                                 .andNest(accept(MediaType.TEXT_EVENT_STREAM), route(GET("/"), applicationHandler::monitor))
+                    ));
     }
 }
