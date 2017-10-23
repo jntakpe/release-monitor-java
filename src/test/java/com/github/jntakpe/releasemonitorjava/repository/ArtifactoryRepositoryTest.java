@@ -26,17 +26,17 @@ public class ArtifactoryRepositoryTest {
         int versionsSizeWithoutMavenMetadata = 8 - 1;
         Application app = new Application().setGroup("com.github.jntakpe").setName("release-monitor");
         StepVerifier.create(artifactoryRepository.findVersions(app))
-                .recordWith(ArrayList::new)
-                .expectNextCount(versionsSizeWithoutMavenMetadata)
-                .consumeRecordedWith(r -> assertThat(r.stream().map(AppVersion::getRaw)).contains("0.1.0-RC1", "0.1.0-SNAPSHOT"))
-                .verifyComplete();
+                    .recordWith(ArrayList::new)
+                    .expectNextCount(versionsSizeWithoutMavenMetadata)
+                    .consumeRecordedWith(r -> assertThat(r.stream().map(AppVersion::getRaw)).contains("0.1.0-RC1", "0.1.0-SNAPSHOT"))
+                    .verifyComplete();
     }
 
     @Test
     public void findVersions_shouldFailCuzUnknownApplication() {
         Application app = new Application().setGroup("com.github.jntakpe").setName("service-unknown");
         StepVerifier.create(artifactoryRepository.findVersions(app))
-                .verifyError(WebClientResponseException.class);
+                    .verifyError(WebClientResponseException.class);
     }
 
     @Test
@@ -44,10 +44,10 @@ public class ArtifactoryRepositoryTest {
         int versionsSizeWithoutMavenMetadata = 8 - 1;
         Application app = new Application().setGroup("com.github.jntakpe").setName("release-monitor");
         StepVerifier.create(artifactoryRepository.findVersions(app))
-                .recordWith(ArrayList::new)
-                .expectNextCount(versionsSizeWithoutMavenMetadata)
-                .consumeRecordedWith(r -> assertThat(new ArrayList<>(r)).isSorted())
-                .verifyComplete();
+                    .recordWith(ArrayList::new)
+                    .expectNextCount(versionsSizeWithoutMavenMetadata)
+                    .consumeRecordedWith(r -> assertThat(new ArrayList<>(r)).isSorted())
+                    .verifyComplete();
     }
 
 }

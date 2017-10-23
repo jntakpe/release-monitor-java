@@ -14,9 +14,9 @@ public final class VersionMapper {
 
     public static List<String> extractRawVersion(FolderDTO folderDTO) {
         return folderDTO.getChildren().stream()
-                .map(FolderChildrenDTO::getUri)
-                .map(PathUtils::removeLeadingSlash)
-                .collect(Collectors.toList());
+                        .map(FolderChildrenDTO::getUri)
+                        .map(PathUtils::removeLeadingSlash)
+                        .collect(Collectors.toList());
     }
 
     public static AppVersion map(String input) {

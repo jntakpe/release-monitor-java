@@ -76,26 +76,12 @@ public class AppVersion implements Comparable<AppVersion> {
             return 1;
         }
         return Comparator.comparingInt(AppVersion::getMajor)
-                .thenComparing(AppVersion::getMinor)
-                .thenComparing(AppVersion::getPatch)
-                .thenComparing(AppVersion::getType)
-                .thenComparing((o1, o2) -> (o1.getRcNumber() != null && o2.getRcNumber() != null) ?
-                        o1.getRcNumber().compareTo(o2.getRcNumber()) : 0)
-                .compare(this, other);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AppVersion)) return false;
-
-        AppVersion that = (AppVersion) o;
-
-        if (major != null ? !major.equals(that.major) : that.major != null) return false;
-        if (minor != null ? !minor.equals(that.minor) : that.minor != null) return false;
-        if (patch != null ? !patch.equals(that.patch) : that.patch != null) return false;
-        if (type != that.type) return false;
-        return rcNumber != null ? rcNumber.equals(that.rcNumber) : that.rcNumber == null;
+                         .thenComparing(AppVersion::getMinor)
+                         .thenComparing(AppVersion::getPatch)
+                         .thenComparing(AppVersion::getType)
+                         .thenComparing((o1, o2) -> (o1.getRcNumber() != null && o2.getRcNumber() != null) ?
+                                 o1.getRcNumber().compareTo(o2.getRcNumber()) : 0)
+                         .compare(this, other);
     }
 
     @Override
@@ -109,9 +95,33 @@ public class AppVersion implements Comparable<AppVersion> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AppVersion)) {
+            return false;
+        }
+        AppVersion that = (AppVersion) o;
+        if (major != null ? !major.equals(that.major) : that.major != null) {
+            return false;
+        }
+        if (minor != null ? !minor.equals(that.minor) : that.minor != null) {
+            return false;
+        }
+        if (patch != null ? !patch.equals(that.patch) : that.patch != null) {
+            return false;
+        }
+        if (type != that.type) {
+            return false;
+        }
+        return rcNumber != null ? rcNumber.equals(that.rcNumber) : that.rcNumber == null;
+    }
+
+    @Override
     public String toString() {
         return "AppVersion{" +
-                "raw='" + raw + '\'' +
-                '}';
+               "raw='" + raw + '\'' +
+               '}';
     }
 }

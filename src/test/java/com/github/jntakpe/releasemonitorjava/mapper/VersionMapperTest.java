@@ -16,7 +16,8 @@ public class VersionMapperTest {
     @Test
     public void extractRawVersion_shouldMapFolderToVersionList() {
         FolderDTO folderDTO = new FolderDTO().setChildren(
-                Stream.of(new FolderChildrenDTO().setUri("/1.0.0-RC1"), new FolderChildrenDTO().setUri("/1.0.0")).collect(Collectors.toList()));
+                Stream.of(new FolderChildrenDTO().setUri("/1.0.0-RC1"), new FolderChildrenDTO().setUri("/1.0.0"))
+                      .collect(Collectors.toList()));
         assertThat(VersionMapper.extractRawVersion(folderDTO)).containsExactly("1.0.0-RC1", "1.0.0");
     }
 

@@ -39,13 +39,15 @@ public class ApplicationDAO {
     }
 
     public Application createReleaseMonitor() {
-        return new Application().setGroup("com.github.jntakpe").setName("release-monitor").setVersions(Collections.singletonList(version()));
+        return new Application().setGroup("com.github.jntakpe")
+                                .setName("release-monitor")
+                                .setVersions(Collections.singletonList(version()));
     }
 
     public Application findAny() {
         return template.find(new Query(), Application.class).stream()
-                .findAny()
-                .orElseThrow(() -> new IllegalStateException("No app found"));
+                       .findAny()
+                       .orElseThrow(() -> new IllegalStateException("No app found"));
     }
 
     public List<Application> findAll() {
