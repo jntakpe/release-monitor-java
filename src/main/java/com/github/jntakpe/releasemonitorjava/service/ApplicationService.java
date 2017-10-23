@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,13 +62,15 @@ public class ApplicationService {
     }
 
     public Flux<Application> monitor() {
-        return findAll().flatMap(this::appWithVersions);
+        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10))
+                   .flatMap(i -> findAll())
+                   .flatMap(this::appWithVersions);
     }
 
     private Mono<Application> appWithVersions(Application app) {
         return artifactoryRepository.findVersions(app)
-                .collect(Collectors.toList())
-                .flatMap(v -> updateVersionsIfNeeded(app, v));
+                                    .collect(Collectors.toList())
+                                    .flatMap(v -> updateVersionsIfNeeded(app, v));
     }
 
     private Mono<Application> updateVersionsIfNeeded(Application existing, List<AppVersion> versions) {
@@ -76,7 +79,7 @@ public class ApplicationService {
         }
         LOGGER.info("Update {} versions to {}", existing, versions);
         return applicationRepository.save(existing.setVersions(versions))
-                .doOnSuccess(a -> LOGGER.info("{} versions updated", a));
+                                    .doOnSuccess(a -> LOGGER.info("{} versions updated", a));
     }
 
     private Mono<Application> findById(ObjectId id) {

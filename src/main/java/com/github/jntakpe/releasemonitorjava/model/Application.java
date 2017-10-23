@@ -80,9 +80,7 @@ public class Application {
     @Override
     public String toString() {
         return "Application{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", group='" + group + '\'' +
+               "name='" + name + '\'' +
                '}';
     }
 }
