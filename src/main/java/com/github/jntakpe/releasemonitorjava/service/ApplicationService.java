@@ -76,10 +76,11 @@ public class ApplicationService {
     private Mono<Application> updateVersionsIfNeeded(Application existing, List<AppVersion> versions) {
         if (existing.getVersions().equals(versions)) {
             return Mono.just(existing);
+        } else {
+            LOGGER.info("Update {} versions to {}", existing, versions);
+            return applicationRepository.save(existing.setVersions(versions))
+                                        .doOnSuccess(a -> LOGGER.info("{} versions updated", a));
         }
-        LOGGER.info("Update {} versions to {}", existing, versions);
-        return applicationRepository.save(existing.setVersions(versions))
-                                    .doOnSuccess(a -> LOGGER.info("{} versions updated", a));
     }
 
     private Mono<Application> findById(ObjectId id) {
