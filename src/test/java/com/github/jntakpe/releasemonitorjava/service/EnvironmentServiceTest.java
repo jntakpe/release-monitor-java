@@ -87,4 +87,22 @@ public class EnvironmentServiceTest {
                     .verifyComplete();
     }
 
+    @Test
+    public void delete_shouldRemoveEnvironment() {
+        Long initCount = environmentDAO.count();
+        Environment app = environmentDAO.findAny();
+        StepVerifier.create(environmentService.delete(app.getId()))
+                    .consumeNextWith(a -> {
+                        assertThat(environmentDAO.count()).isEqualTo(initCount - 1);
+                        assertThat(environmentDAO.findAll()).doesNotContain(app);
+                    })
+                    .verifyComplete();
+    }
+
+    @Test
+    public void delete_shouldFailIfIdMissing() {
+        StepVerifier.create(environmentService.delete(new ObjectId()))
+                    .verifyError(EmptyResultDataAccessException.class);
+    }
+    
 }

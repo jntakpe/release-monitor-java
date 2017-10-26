@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,5 +43,9 @@ public class EnvironmentDAO {
 
     public Environment createDxpIntegration() {
         return new Environment().setName("dxp-azure").setType(EnvironmentType.INTEGRATION).setUrl("http://dxpint.edgility.cloud");
+    }
+
+    public List<Environment> findAll() {
+        return template.findAll(Environment.class);
     }
 }

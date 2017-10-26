@@ -36,6 +36,14 @@ public class EnvironmentService {
                 .doOnSuccess(e -> LOGGER.info("{} updated", e));
     }
 
+    public Mono<Environment> delete(ObjectId id) {
+        return findById(id)
+                .switchIfEmpty(errorIfEmpty(id))
+                .doOnNext(e -> LOGGER.info("Deleting {}", e))
+                .flatMap(e -> environmentRepository.delete(e).then(Mono.just(e)))
+                .doOnSuccess(e -> LOGGER.info("{} deleted", e));
+    }
+
     private Mono<Environment> findById(ObjectId id) {
         return Mono.just(id)
                    .doOnNext(i -> LOGGER.debug("Searching environment with id {}", i))
