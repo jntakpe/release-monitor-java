@@ -79,7 +79,6 @@ public class Environment {
         return "Environment{" +
                "name='" + name + '\'' +
                ", type=" + type +
-               ", url='" + url + '\'' +
                '}';
     }
 }

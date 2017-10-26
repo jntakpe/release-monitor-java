@@ -14,6 +14,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -104,5 +106,23 @@ public class EnvironmentServiceTest {
         StepVerifier.create(environmentService.delete(new ObjectId()))
                     .verifyError(EmptyResultDataAccessException.class);
     }
-    
+
+    @Test
+    public void findAll_shouldRetrieveSome() {
+        StepVerifier.create(environmentService.findAll())
+                    .recordWith(ArrayList::new)
+                    .expectNextCount(environmentDAO.count())
+                    .consumeRecordedWith(r -> assertThat(r).contains(environmentDAO.createDxpAssembly(),
+                                                                     environmentDAO.createDxpIntegration()))
+                    .verifyComplete();
+    }
+
+    @Test
+    public void findAll_shouldBeEmpty() {
+        environmentDAO.deleteAll();
+        StepVerifier.create(environmentService.findAll())
+                    .expectNextCount(0)
+                    .verifyComplete();
+    }
+
 }

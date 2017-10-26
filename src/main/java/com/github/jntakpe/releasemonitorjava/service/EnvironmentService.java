@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -42,6 +43,13 @@ public class EnvironmentService {
                 .doOnNext(e -> LOGGER.info("Deleting {}", e))
                 .flatMap(e -> environmentRepository.delete(e).then(Mono.just(e)))
                 .doOnSuccess(e -> LOGGER.info("{} deleted", e));
+    }
+
+    public Flux<Environment> findAll() {
+        return Mono.just(true)
+                   .doOnNext(b -> LOGGER.debug("Searching all environments"))
+                   .flatMapMany(e -> environmentRepository.findAll())
+                   .doOnComplete(() -> LOGGER.debug("All environment retrieved"));
     }
 
     private Mono<Environment> findById(ObjectId id) {
