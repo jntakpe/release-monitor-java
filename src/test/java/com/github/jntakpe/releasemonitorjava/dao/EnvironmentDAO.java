@@ -30,6 +30,12 @@ public class EnvironmentDAO {
         template.insertAll(Stream.of(createDxpAssembly(), createDxpIntegration()).collect(Collectors.toList()));
     }
 
+    public Environment findAny() {
+        return template.find(new Query(), Environment.class).stream()
+                       .findAny()
+                       .orElseThrow(() -> new IllegalStateException("No env found"));
+    }
+
     public Environment createDxpAssembly() {
         return new Environment().setName("dxp-azure").setType(EnvironmentType.ASSEMBLY).setUrl("http://dxpasm.edgility.cloud");
     }
