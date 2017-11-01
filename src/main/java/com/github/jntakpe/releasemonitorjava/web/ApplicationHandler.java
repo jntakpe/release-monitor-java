@@ -4,7 +4,6 @@ import com.github.jntakpe.releasemonitorjava.mapper.ApplicationMapper;
 import com.github.jntakpe.releasemonitorjava.model.api.ApplicationDTO;
 import com.github.jntakpe.releasemonitorjava.service.ApplicationService;
 import org.springframework.data.util.Pair;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -26,12 +25,6 @@ public class ApplicationHandler {
 
     public Mono<ServerResponse> findAll(ServerRequest serverRequest) {
         return ServerResponse.ok().body(applicationService.findAll().map(ApplicationMapper::map), ApplicationDTO.class);
-    }
-
-    public Mono<ServerResponse> monitor(ServerRequest serverRequest) {
-        return ServerResponse.ok()
-                             .contentType(MediaType.TEXT_EVENT_STREAM)
-                             .body(applicationService.monitor().map(ApplicationMapper::map), ApplicationDTO.class);
     }
 
     public Mono<ServerResponse> create(ServerRequest request) {

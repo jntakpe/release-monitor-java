@@ -1,6 +1,7 @@
 package com.github.jntakpe.releasemonitorjava.service;
 
 import com.github.jntakpe.releasemonitorjava.dao.ApplicationDAO;
+import com.github.jntakpe.releasemonitorjava.model.AppVersion;
 import com.github.jntakpe.releasemonitorjava.model.Application;
 import org.bson.types.ObjectId;
 import org.junit.Before;
@@ -11,11 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -126,67 +127,32 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void monitor_shouldRetrieveSomeWithVersions() {
-        Long count = applicationDAO.count();
-        StepVerifier.withVirtualTime(() -> applicationService.monitor())
+    public void refreshVersions_shouldUpdateVersions() {
+        Application app = applicationDAO.findAny();
+        List<AppVersion> versions = app.getVersions();
+        StepVerifier.create(applicationService.refreshVersions(app))
                     .expectSubscription()
-                    .expectNoEvent(Duration.ZERO)
-                    .recordWith(ArrayList::new)
-                    .expectNextCount(count)
-                    .consumeRecordedWith(r -> {
-                        assertThat(r).hasSize(count.intValue());
-                        r.stream().map(Application::getVersions).forEach(v -> assertThat(v).isNotEmpty());
+                    .consumeNextWith(a -> {
+                        assertThat(a.getVersions()).isNotEqualTo(versions);
+                        assertThat(a.getVersions()).isEqualTo(applicationDAO.findById(a.getId()).getVersions());
                     })
-                    .thenCancel()
-                    .verify();
-
+                    .verifyComplete();
     }
 
     @Test
-    public void monitor_shouldUpdateVersions() {
-        StepVerifier.withVirtualTime(() -> applicationService.monitor())
+    public void refreshVersions_shouldBeEmptyIfNotFound() {
+        Application app = applicationDAO.insert(applicationDAO.createAppWithoutVersions());
+        StepVerifier.create(applicationService.refreshVersions(app))
                     .expectSubscription()
-                    .expectNoEvent(Duration.ZERO)
-                    .recordWith(ArrayList::new)
-                    .expectNextCount(applicationDAO.count())
-                    .consumeRecordedWith(r -> {
-                        assertThat(r).isNotEmpty();
-                        r.forEach(a -> assertThat(a.getVersions()).isEqualTo(applicationDAO.findById(a.getId()).getVersions()));
-                    })
-                    .thenCancel()
-                    .verify();
+                    .consumeNextWith(a -> assertThat(a.getVersions()).isEmpty())
+                    .verifyComplete();
     }
 
     @Test
-    public void monitor_shouldRefreshApplicationsAtFixedInterval() {
-        Consumer<Application> consumer = app -> {
-            assertThat(app).isNotNull();
-            assertThat(applicationDAO.createMockPi().equals(app) || applicationDAO.createReleaseMonitor().equals(app)).isTrue();
-            assertThat(app.getVersions()).isNotEmpty();
-        };
-        StepVerifier.withVirtualTime(() -> applicationService.monitor())
+    public void refreshVersions_shouldFailCuzUnauthorized() {
+        Application app = new Application().setGroup("com.github.jntakpe").setName("service-unauthorized");
+        StepVerifier.create(applicationService.refreshVersions(app))
                     .expectSubscription()
-                    .expectNoEvent(Duration.ZERO)
-                    .consumeNextWith(consumer)
-                    .consumeNextWith(consumer)
-                    .expectNoEvent(Duration.ofSeconds(10))
-                    .consumeNextWith(consumer)
-                    .consumeNextWith(consumer)
-                    .expectNoEvent(Duration.ofSeconds(10))
-                    .consumeNextWith(consumer)
-                    .consumeNextWith(consumer)
-                    .thenCancel()
-                    .verify();
+                    .verifyError(WebClientResponseException.class);
     }
-
-    @Test
-    public void monitor_shouldNotRetrieveAnyApplication() {
-        applicationDAO.deleteAll();
-        StepVerifier.create(applicationService.monitor())
-                    .expectSubscription()
-                    .expectNoEvent(Duration.ofSeconds(1))
-                    .thenCancel()
-                    .verify();
-    }
-
 }

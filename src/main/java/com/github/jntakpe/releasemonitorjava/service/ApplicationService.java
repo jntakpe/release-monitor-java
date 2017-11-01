@@ -8,11 +8,13 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,15 +63,10 @@ public class ApplicationService {
                    .doOnComplete(() -> LOGGER.debug("All application retrieved"));
     }
 
-    public Flux<Application> monitor() {
-        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10))
-                   .flatMap(i -> findAll())
-                   .flatMap(this::appWithVersions);
-    }
-
-    private Mono<Application> appWithVersions(Application app) {
+    public Mono<Application> refreshVersions(Application app) {
         return artifactoryRepository.findVersions(app)
                                     .collect(Collectors.toList())
+                                    .onErrorResume(this::isNotFoundError, e -> Mono.just(Collections.emptyList()))
                                     .flatMap(v -> updateVersionsIfNeeded(app, v));
     }
 
@@ -81,6 +78,10 @@ public class ApplicationService {
             return applicationRepository.save(existing.setVersions(versions))
                                         .doOnSuccess(a -> LOGGER.info("{} versions updated", a));
         }
+    }
+
+    private boolean isNotFoundError(Throwable e) {
+        return e instanceof WebClientResponseException && ((WebClientResponseException) e).getStatusCode() == HttpStatus.NOT_FOUND;
     }
 
     private Mono<Application> findById(ObjectId id) {

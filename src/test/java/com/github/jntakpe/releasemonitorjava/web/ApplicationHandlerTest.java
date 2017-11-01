@@ -13,11 +13,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.jntakpe.releasemonitorjava.web.UriConstants.API;
@@ -69,30 +65,6 @@ public class ApplicationHandlerTest {
             List<ApplicationDTO> apps = l.getResponseBody();
             assertThat(apps).isEmpty();
         });
-    }
-
-    @Test
-    public void monitor_shouldRetrieveSomeApps() {
-        Long count = applicationDAO.count();
-        Flux<ApplicationDTO> response = client.get()
-                                              .uri(UriConstants.API + UriConstants.APPLICATIONS)
-                                              .accept(MediaType.TEXT_EVENT_STREAM)
-                                              .exchange()
-                                              .expectStatus().isOk()
-                                              .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM)
-                                              .returnResult(ApplicationDTO.class)
-                                              .getResponseBody();
-        StepVerifier.withVirtualTime(() -> response)
-                    .expectSubscription()
-                    .expectNoEvent(Duration.ZERO)
-                    .recordWith(ArrayList::new)
-                    .expectNextCount(count)
-                    .consumeRecordedWith(r -> {
-                        assertThat(r).hasSize(count.intValue());
-                        r.stream().map(ApplicationDTO::getVersions).forEach(v -> assertThat(v).isNotEmpty());
-                    })
-                    .thenCancel()
-                    .verify();
     }
 
     @Test

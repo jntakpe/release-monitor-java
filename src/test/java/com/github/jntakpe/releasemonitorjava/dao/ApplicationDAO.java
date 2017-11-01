@@ -30,18 +30,13 @@ public class ApplicationDAO {
         template.remove(new Query(), Application.class);
     }
 
+    public Application insert(Application application) {
+        template.insert(application);
+        return application;
+    }
+
     public void insertAll() {
         template.insertAll(Stream.of(createMockPi(), createReleaseMonitor()).collect(Collectors.toList()));
-    }
-
-    public Application createMockPi() {
-        return new Application().setGroup("com.github.jntakpe").setName("mockpi");
-    }
-
-    public Application createReleaseMonitor() {
-        return new Application().setGroup("com.github.jntakpe")
-                                .setName("release-monitor")
-                                .setVersions(Collections.singletonList(version()));
     }
 
     public Application findAny() {
@@ -56,6 +51,21 @@ public class ApplicationDAO {
 
     public Application findById(ObjectId id) {
         return template.findById(id, Application.class);
+    }
+
+    public Application createMockPi() {
+        return new Application().setGroup("com.github.jntakpe").setName("mockpi");
+    }
+
+    public Application createReleaseMonitor() {
+        return new Application().setGroup("com.github.jntakpe")
+                                .setName("release-monitor")
+                                .setVersions(Collections.singletonList(version()));
+    }
+
+    public Application createAppWithoutVersions() {
+        return new Application().setGroup("com.github.jntakpe")
+                                .setName("not-yet-released");
     }
 
     private AppVersion version() {

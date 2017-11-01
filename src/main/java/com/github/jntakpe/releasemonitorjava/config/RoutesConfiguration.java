@@ -30,7 +30,6 @@ public class RoutesConfiguration {
                                  .and(route(POST("/"), applicationHandler::create))
                                  .and(route(PUT("/{id}"), applicationHandler::update))
                                  .and(route(DELETE("/{id}"), applicationHandler::delete)))
-                                 .andNest(accept(MediaType.TEXT_EVENT_STREAM), route(GET("/"), applicationHandler::monitor))
                     ));
     }
 }
